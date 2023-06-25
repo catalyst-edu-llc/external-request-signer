@@ -6,7 +6,7 @@
   "scripts": {
     "test": "npx jest ",
     "browserify-dist": "npx browserify -p [ tinyify --no-flat ] ./browser.js > ./dist/ce-ext-request-signer.js",
-    "browserify": "npx browserify -p [ tinyify --no-flat ] ./browser.js "
+    "browserify-cb": "npx browserify -p [ tinyify --no-flat ] ./browser.js | pbcopy"
   },
   "author": "",
   "license": "ISC",
