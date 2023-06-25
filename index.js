@@ -5,13 +5,18 @@ if (typeof window === 'undefined') {
   customAlphabet = require('nanoid/index.browser').customAlphabet
 }
 
-module.exports = {
-  ceCreateSignedRequest: ({ clientKey, secret, payload }) => {
-  // *********************************
-  // avoid scoping collisions
-    const ceObjectHash = require('object-hash')
-    const ceCopy = (src) => (JSON.parse(JSON.stringify(src)))
+const ceCopy = (src) => (JSON.parse(JSON.stringify(src)))
+const objectHash = require('object-hash')
 
+const self = {
+  signRequest: ({ request, secret }) => {
+    delete request.signature
+    request.secret = secret
+    request.signature = objectHash(request)
+    delete request.secret
+  },
+
+  createSignedRequest: ({ clientKey, secret, payload }) => {
     const ceGenerateNonce = () => {
       const createNanoId = customAlphabet('23456789ABCDEFGHJKLMNPQRSTUVWXYZ', 16)
       const id = createNanoId()
@@ -28,8 +33,27 @@ module.exports = {
     }
 
     const request = ceCopy(requestEnvelope)
-    request.secret = secret
-    request.signature = ceObjectHash(request)
+    self.signRequest({ request, secret })
     return request
+  },
+
+  validateSignedRequest: async ({ clientKey, secret, signedRequest, expiration = 20, nonceValidator }) => {
+    const request = ceCopy(signedRequest)
+    if (typeof secret === 'function') {
+      secret = await secret(clientKey)
+    }
+    self.signRequest({ request, secret })
+    if (request.signature !== signedRequest.signature) {
+      throw new Error('SIGNATURE_MISMATCH')
+    }
+    if (Date.now() > (signedRequest.timestamp + expiration * 1000)) {
+      throw new Error('EXPIRED_REQUEST')
+    }
+    if (nonceValidator) {
+      await nonceValidator(signedRequest)
+    }
+    return signedRequest.payload
   }
 }
+
+module.exports = self

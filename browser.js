@@ -1,1 +1,1 @@
-global.ceCreateSignedRequest = require('./index').ceCreateSignedRequest
+global.ceCreateSignedRequest = require('./index').createSignedRequest
