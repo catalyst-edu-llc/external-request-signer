@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "npx jest ",
-    "browserify": "npx browserify -p [ tinyify --no-flat ] ./browser.js > ./dist/ce-ext-request-signer.js"
+    "browserify-dist": "npx browserify -p [ tinyify --no-flat ] ./browser.js > ./dist/ce-ext-request-signer.js",
+    "browserify": "npx browserify -p [ tinyify --no-flat ] ./browser.js "
   },
   "author": "",
   "license": "ISC",
